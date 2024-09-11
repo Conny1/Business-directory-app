@@ -1,14 +1,14 @@
 import { Text, View } from "react-native";
 import React, { Component } from "react";
 
-export class Expolore extends Component {
+export class Profile extends Component {
   render() {
     return (
       <View>
-        <Text>Expolore</Text>
+        <Text>Profile</Text>
       </View>
     );
   }
 }
 
-export default Expolore;
+export default Profile;
