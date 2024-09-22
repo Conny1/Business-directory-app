@@ -11,15 +11,6 @@ import {
 } from "firebase/firestore/lite";
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyBoDADnLJVBmQy0bVaePqqR0mKBYozwraM",
-  authDomain: "contact-1748a.firebaseapp.com",
-  databaseURL: "https://contact-1748a-default-rtdb.firebaseio.com",
-  projectId: "contact-1748a",
-  storageBucket: "contact-1748a.appspot.com",
-  messagingSenderId: "40713240854",
-  appId: "1:40713240854:web:4b2bc20e01b2239adb1037",
-};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
