@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -7,27 +8,40 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Rating, AirbnbRating } from "react-native-ratings";
+import { getBusinessByID } from "@/firebase/firebase";
+import { businessType } from "@/utils/types";
 
 const Business = () => {
   const { id } = useLocalSearchParams();
+  const [BusinessDetail, setBusinessDetail] = useState<
+    businessType | undefined
+  >(undefined);
+  const [loading, setloading] = useState(false);
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({ headerShown: true, title: "Business" });
+    setloading(true);
+    getBusinessByID(id as string).then((data) => {
+      setBusinessDetail(data[0]);
+      setloading(false);
+    });
   }, []);
-  const BusinessDetail = {
-    address: "123 Market Street, Downtown",
-    rating: 4.5,
-    name: "FreshGrocer",
-    category: "Shopping", // Random category added
-    imgurl:
-      "https://img.freepik.com/free-photo/luxurious-car-parked-highway-with-illuminated-headlight-sunset_181624-60607.jpg?t=st=1726773348~exp=1726776948~hmac=05fb79dcb2c841d8695317b6f88bb0b68f2877cd6b11c16e25e4ec71a3235810&w=740",
-  };
 
-  return (
+  return !BusinessDetail ? (
+    loading ? (
+      <View>
+        <ActivityIndicator size="large" />
+      </View>
+    ) : (
+      <View>
+        <Text>No business Preview available</Text>
+      </View>
+    )
+  ) : (
     <ScrollView style={styles.busines}>
       {/* into */}
       <View>
@@ -62,15 +76,14 @@ const Business = () => {
       {/* about */}
       <View style={styles.about}>
         <Text style={{ fontSize: 20, fontWeight: 600 }}>About</Text>
-        <Text>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quod nam
-          aperiam nostrum quis, modi voluptatibus. Voluptate debitis ipsam illum
-          repellendus delectus! Quisquam eligendi sequi nemo similique nihil
-          mollitia tempora at! Lorem, ipsum dolor sit amet consectetur
-          adipisicing elit. Beatae molestiae perferendis maiores doloribus,
-          animi molestias non amet nulla velit assumenda fuga. Velit vero optio
-          reiciendis molestias totam fuga, nam in.
-        </Text>
+        <View style={{ height: 100 }}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            style={{ maxHeight: 100 }}
+          >
+            <Text>{BusinessDetail.about}</Text>
+          </ScrollView>
+        </View>
       </View>
       {/* Reviews */}
       <View>

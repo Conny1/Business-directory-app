@@ -26,8 +26,8 @@ const BusinessByCategory = () => {
         style={{ marginLeft: 18 }}
         showsHorizontalScrollIndicator={false}
         data={business}
-        renderItem={({ item, index }) => (
-          <BusinessCard key={index} item={item} screen="explore" />
+        renderItem={({ item }) => (
+          <BusinessCard key={item.id} item={item} screen="explore" />
         )}
       />
     </View>

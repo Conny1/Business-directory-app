@@ -4,9 +4,13 @@ export type CategoryType = {
 };
 
 export type businessType = {
+  id?: string;
   name: string;
-  imageurl: string;
+  imgurl: string;
   address: string;
   rating: number;
-  category: string; // Random category added
+  category: string;
+  about: string;
+  contact: string;
+  website: string;
 };

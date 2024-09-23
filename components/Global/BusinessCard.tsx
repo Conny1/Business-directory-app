@@ -17,7 +17,7 @@ type Props = {
     address: string;
     category: string;
     rating: number;
-    // id: number;
+    id?: string;
   };
 };
 const BusinessCard = ({ item, screen }: Props) => {
@@ -25,7 +25,7 @@ const BusinessCard = ({ item, screen }: Props) => {
   return (
     <TouchableOpacity
       onPress={() => {
-        const path = `/business/${item.name}` as Href<string>;
+        const path = `/business/${item.id}` as Href<string>;
         router.push(path);
       }}
       style={{

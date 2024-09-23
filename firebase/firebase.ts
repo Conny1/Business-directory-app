@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
-import { businessType } from "@/utils/types";
+import { businessType, CategoryType } from "@/utils/types";
 import { initializeApp } from "firebase/app";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import {
   getFirestore,
   collection,
@@ -8,6 +9,7 @@ import {
   Firestore,
   query,
   where,
+  addDoc,
 } from "firebase/firestore/lite";
 
 // Your web app's Firebase configuration
@@ -21,7 +23,7 @@ async function getCategories() {
   const categoriesData = await getDocs(categories);
   // console.log(categoriesData.docs[0].data());
   const categoriesList = categoriesData.docs.map((doc) => doc.data());
-  return categoriesList;
+  return categoriesList as CategoryType[];
 }
 
 async function getBusinessBytCategory(name: string): Promise<businessType[]> {
@@ -29,9 +31,77 @@ async function getBusinessBytCategory(name: string): Promise<businessType[]> {
   const q = query(business, where("category", "==", name.toLowerCase()));
 
   const businesssData = await getDocs(q);
-  console.log(businesssData.docs[0].data());
-  const businessList = businesssData.docs.map((doc) => doc.data());
+
+  const businessList = businesssData.docs.map((doc, i) => ({
+    ...doc.data(),
+    id: businesssData.docs[i].id,
+  }));
+
   return businessList as businessType[];
 }
 
-export { getCategories, getBusinessBytCategory };
+async function getBusinessByID(id: string): Promise<businessType[]> {
+  const business = collection(db, "business");
+  const q = query(business, where("__name__", "==", id));
+
+  const businesssData = await getDocs(q);
+
+  const businessList = businesssData.docs.map((doc, i) => ({
+    ...doc.data(),
+    id: businesssData.docs[i].id,
+  }));
+  return businessList as businessType[];
+}
+
+async function getBusiness(): Promise<businessType[]> {
+  const business = collection(db, "business");
+
+  const businesssData = await getDocs(business);
+
+  const businessList = businesssData.docs.map((doc, i) => ({
+    ...doc.data(),
+    id: businesssData.docs[i].id,
+  }));
+
+  return businessList as businessType[];
+}
+const addData = async (payload: businessType) => {
+  try {
+    // Get the reference to the 'business' collection
+    const businessRef = collection(db, "business");
+
+    // Add the document with the payload
+    const businessDoc = await addDoc(businessRef, payload);
+
+    console.log("Document added with ID: ", businessDoc.id);
+    return true;
+  } catch (error) {
+    console.log("Error adding document: ", error);
+    return false;
+  }
+};
+const storage = getStorage(app);
+const fileUploadFirebase = async (uri: string) => {
+  const fileName = Date.now().toString() + ".jpg";
+  const resp = await fetch(uri);
+  const blob = await resp.blob();
+
+  const storageRef = ref(storage, fileName);
+
+  // 'file' comes from the Blob or File API
+  await uploadBytes(storageRef, blob);
+  let data = await getDownloadURL(storageRef);
+
+  return data;
+};
+
+export {
+  getCategories,
+  getBusinessBytCategory,
+  getBusinessByID,
+  getBusiness,
+  addData,
+  db,
+  storage,
+  fileUploadFirebase,
+};
