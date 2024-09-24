@@ -18,6 +18,8 @@ import {
   fileUploadFirebase,
   getCategories,
 } from "@/firebase/firebase";
+import { useUser } from "@clerk/clerk-expo";
+
 
 const Addbusiness = () => {
   const navigation = useNavigation();
@@ -25,6 +27,7 @@ const Addbusiness = () => {
   const [categories, setcategories] = useState<
     { label: string; value: string }[]
   >([]);
+  const user = useUser().user
   const [name, setname] = useState("");
   const [address, setaddress] = useState("");
   const [contact, setcontact] = useState("");
@@ -33,6 +36,7 @@ const Addbusiness = () => {
   const [category, setcategory] = useState("");
   const [rating] = useState(1);
   const [loading, setloading] = useState(false);
+  
 
   useEffect(() => {
     navigation.setOptions({ headerShown: true, title: "Add Business" });
@@ -84,6 +88,7 @@ const Addbusiness = () => {
           website,
           category: category.toLowerCase(),
           rating: 2,
+          userid:user?.id
         });
         setloading(false);
       } else {

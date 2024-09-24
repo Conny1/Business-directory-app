@@ -13,4 +13,13 @@ export type businessType = {
   about: string;
   contact: string;
   website: string;
+  userid?:string
 };
+
+export type Comment = {
+  comment: string;
+  businessid: string;
+  user:string
+  id?:string
+};
+

@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { businessType, CategoryType } from "@/utils/types";
+import { businessType, CategoryType, Comment } from "@/utils/types";
 import { initializeApp } from "firebase/app";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 import {
@@ -12,7 +12,10 @@ import {
   addDoc,
 } from "firebase/firestore/lite";
 
+
 // Your web app's Firebase configuration
+
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -43,6 +46,19 @@ async function getBusinessBytCategory(name: string): Promise<businessType[]> {
 async function getBusinessByID(id: string): Promise<businessType[]> {
   const business = collection(db, "business");
   const q = query(business, where("__name__", "==", id));
+
+  const businesssData = await getDocs(q);
+
+  const businessList = businesssData.docs.map((doc, i) => ({
+    ...doc.data(),
+    id: businesssData.docs[i].id,
+  }));
+  return businessList as businessType[];
+}
+
+async function getBusinessByUserID(id: string): Promise<businessType[]> {
+  const business = collection(db, "business");
+  const q = query(business, where("userid", "==", id));
 
   const businesssData = await getDocs(q);
 
@@ -94,6 +110,36 @@ const fileUploadFirebase = async (uri: string) => {
 
   return data;
 };
+const addComent = async (payload: Comment) => {
+  try {
+    // Get the reference to the 'business' collection
+    const commentRef = collection(db, "comments");
+
+    // Add the document with the payload
+    const commentsDoc = await addDoc(commentRef, payload);
+
+    console.log("Document added with ID: ", commentsDoc.id);
+    return true;
+  } catch (error) {
+    console.log("Error adding document: ", error);
+    return false;
+  }
+};
+
+async function getCommentbyBusiness(id: string): Promise<Comment[]> {
+ 
+  const comment = collection(db, "comments");
+  const q = query(comment, where("businessid", "==", id));
+
+  const commentsData = await getDocs(q);
+
+  const commentList = commentsData.docs.map((doc, i) => ({
+    ...doc.data(),
+    id: commentsData.docs[i].id,
+  }));
+  
+  return commentList as Comment[];
+}
 
 export {
   getCategories,
@@ -104,4 +150,7 @@ export {
   db,
   storage,
   fileUploadFirebase,
+  getBusinessByUserID,
+  addComent,
+  getCommentbyBusiness
 };

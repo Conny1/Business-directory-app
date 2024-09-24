@@ -1,5 +1,6 @@
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   ScrollView,
   StyleSheet,
@@ -11,9 +12,11 @@ import {
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Rating, AirbnbRating } from "react-native-ratings";
-import { getBusinessByID } from "@/firebase/firebase";
-import { businessType } from "@/utils/types";
+import { Rating } from "react-native-ratings";
+import { addComent, getBusinessByID, getCommentbyBusiness } from "@/firebase/firebase";
+import { businessType, Comment } from "@/utils/types";
+import { useUser } from "@clerk/clerk-expo";
+
 
 const Business = () => {
   const { id } = useLocalSearchParams();
@@ -21,6 +24,9 @@ const Business = () => {
     businessType | undefined
   >(undefined);
   const [loading, setloading] = useState(false);
+  const [comment, setcomment] = useState("")
+  const [comments, setcomments] = useState <Comment[]> ([])
+  const user = useUser().user
   const navigation = useNavigation();
   useEffect(() => {
     navigation.setOptions({ headerShown: true, title: "Business" });
@@ -28,8 +34,29 @@ const Business = () => {
     getBusinessByID(id as string).then((data) => {
       setBusinessDetail(data[0]);
       setloading(false);
+      const businessid = data[0].id as string
+      getCommentbyBusiness(businessid).then((data)=> setcomments(data) )
     });
+  
+   
   }, []);
+
+  const submitComment= ()=>{
+    if(comment === ""){
+    return  alert("Cannot add an empty comment")
+    }
+    try {
+      setloading(true)
+      const userName = user?.fullName as string
+      const businessid = BusinessDetail?.id as string
+      addComent({user:userName, comment:comment, businessid:businessid})
+      setcomment("")
+      setloading(false)
+
+    } catch (error) {
+      
+    }
+  }
 
   return !BusinessDetail ? (
     loading ? (
@@ -96,7 +123,7 @@ const Business = () => {
           type="star"
           ratingCount={5}
           imageSize={40}
-          // showRating
+          showRating={user?.id.toString() === BusinessDetail?.userid?.toString()}
           //   onFinishRating={this.ratingCompleted}
         />
 
@@ -104,9 +131,12 @@ const Business = () => {
           <TextInput
             style={{ padding: 10, width: "90%", height: 70 }}
             placeholder="search..."
+            onChangeText={(val)=>setcomment(val)}
+            value={comment}
           />
         </View>
-        <TouchableOpacity
+       { comment && loading ?<ActivityIndicator size="large" /> : <TouchableOpacity
+        onPress={submitComment}
           style={{
             backgroundColor: "#6d43df",
             width: 100,
@@ -117,9 +147,25 @@ const Business = () => {
           }}
         >
           <Text style={{ textAlign: "center", color: "#fff" }}>Submit</Text>
-        </TouchableOpacity>
+        </TouchableOpacity>}
         <View style={styles.comment}>
-          <Text>My sample comment </Text>
+         {
+          comments.length ==0 ? <Text>No comments available</Text> :
+           <FlatList
+           horizontal={true}
+          data={comments}
+          scrollEnabled
+          style={{  height:"auto" }}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({item})=>{
+         return <View style={styles.commentCard} key={item.id}> 
+         <Text style={{backgroundColor:"#217af2", fontSize:10, alignSelf:"flex-start" ,padding:5, color:"#fff", borderRadius:10}} > {item.user} </Text>
+         <Text style={{fontSize:13, fontWeight:600}} >{item.comment} </Text>
+          </View>   
+          }}
+        />
+         }
+         
         </View>
       </View>
     </ScrollView>
@@ -132,7 +178,17 @@ const styles = StyleSheet.create({
   busines: {},
   comment: {
     marginHorizontal: 20,
-    marginBottom: 20,
+    marginBottom:20
+   
+   
+  },
+  commentCard:{
+    backgroundColor:"#ffff",
+    padding:10,
+    borderRadius:20,
+    marginLeft:10,
+    width:200,   
+    alignSelf:"flex-start"
   },
   intro: {
     marginTop: -30,

@@ -53,7 +53,7 @@ const Profile = () => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            const path = "/business/mine" as Href<String>;
+            const path = "/business/mybusineses" as Href<String>;
             router.push(path);
           }}
           style={styles.btn}
